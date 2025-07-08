@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  cinexapi:
+    image: eurival/cinexapi:latest  # Substitua pela sua imagem JHipster
+    container_name: cinexapi
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    ports:
+      - '8080:8080'
+    networks:
+      - cinexnet
+
+  frontend:
+    build: .
+    container_name: cinex-cadastropromocao
+    depends_on:
+      - cinexapi
+    ports:
+      - '5173:80'
+    networks:
+      - cinexnet
+
+networks:
+  cinexnet:
+    driver: bridge

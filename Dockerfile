@@ -5,12 +5,12 @@ FROM node:20-slim AS build
 # Define o diretório de trabalho dentro do contêiner.
 WORKDIR /app
 
-# Copia primeiro o package.json e o package-lock.json.
-# O Docker armazena essa camada em cache. Se esses arquivos não mudarem,
-# ele não rodará 'npm install' de novo, tornando o build muito mais rápido.
-COPY package*.json ./
+# --- CORREÇÃO IMPORTANTE ---
+# Copia APENAS o package.json para forçar uma instalação limpa.
+COPY package.json ./
 
-# Instala as dependências DENTRO do contêiner Linux.
+# Instala as dependências DENTRO do contêiner Linux, gerando um
+# package-lock.json novo e correto para o ambiente.
 RUN npm install
 
 # Copia o resto do código-fonte da sua aplicação.

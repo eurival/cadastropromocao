@@ -18,10 +18,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - cadastropromocao.ingressocinex.com.br
+    - ingressocinex.com.br
     secretName: cadastropromocao-tls-secret
   rules:
-  - host: cadastropromocao.ingressocinex.com.br
+  - host: ingressocinex.com.br
     http:
       paths:
       - path: /

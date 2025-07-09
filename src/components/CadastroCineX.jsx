@@ -110,7 +110,8 @@ export default function CadastroCineX() {
           fone: formData.telefone,
           email: formData.email,
           cpf: formData.cpf,
-          cupomEnviado: false
+          cupomEnviado: false,
+          dataCriacao: new Date().toISOString()
         })
       });
       if (!res.ok) throw new Error('Falha no cadastro');

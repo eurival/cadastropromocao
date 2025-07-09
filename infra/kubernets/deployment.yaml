@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cadastropromocao-deployment
-  namespace: cadastropromocao-apps # Crie um namespace dedicado
+  namespace: cadastropromocao-apps
 spec:
   replicas: 2
   selector:
@@ -10,11 +10,29 @@ spec:
       app: cadastropromocao
   template:
     metadata:
+      annotations:
+        redeploy-at: "2025-07-09T01:55:20Z"
       labels:
         app: cadastropromocao
     spec:
       containers:
       - name: cadastropromocao
-        image: public.ecr.aws/t6g4w7z5/cadastropromocao-frontend:latest # Imagem a ser usada
+        image: public.ecr.aws/t6g4w7z5/cadastropromocao-frontend:latest
         ports:
-        - containerPort: 80 # Porta do NGINX
+        - containerPort: 80
+        env:
+        # 1. Endereço interno da API
+        - name: VITE_API_BASE_URL
+          value: "http://cinexapi-service.cinex-apps:8080"
+        # 2. Usuário da API, lido do Secret
+        - name: VITE_API_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: cadastropromocao-api-credentials
+              key: API_USERNAME
+        # 3. Senha da API, lida do Secret
+        - name: VITE_API_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cadastropromocao-api-credentials
+              key: API_PASSWORD

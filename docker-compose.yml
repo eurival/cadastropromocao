@@ -12,7 +12,7 @@ services:
 
   frontend:
     build: .
-    container_name: cinex-cadastropromocao
+    container_name: cadastropromocao-frontend
     depends_on:
       - cinexapi
     ports:

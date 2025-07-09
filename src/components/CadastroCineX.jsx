@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { isValidCPF } from '../utils/cpf';
+import { useNavigate } from 'react-router-dom';
 
 // URLs de API
-const AUTH_URL = '/api/authenticate'; // via proxy em vite.config.js
-const CADASTRO_URL = '/api/cadastropromocao';
-const PROMO_URL = '/api/promocaoValida';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''; 
+
+// URLs de API construídas a partir da base
+const AUTH_URL = `${API_BASE_URL}/api/authenticate`;
+const CADASTRO_URL = `${API_BASE_URL}/api/cadastropromocaos`;
+const PROMO_URL = `${API_BASE_URL}/api/cadastropromocao-extended/promocaoValidada`;
 
 export default function CadastroCineX() {
+  const navigate = useNavigate();        // ← aqui!
   // Estados principais
   const [token, setToken] = useState('');         // Bearer token
   const [promoValid, setPromoValid] = useState(null); // null=pendente, true=ativa, false=encerrada
-  const [promoEnds, setPromoEnds] = useState('');  // data de encerramento
+  //const [promoEnds, setPromoEnds] = useState('');  // data de encerramento
   const [formData, setFormData] = useState({ nome: '', telefone: '', email: '', cpf: '' });
   const [errors, setErrors] = useState({});
 
@@ -18,22 +23,37 @@ export default function CadastroCineX() {
   useEffect(() => {
     async function init() {
       try {
+        const username = import.meta.env.VITE_API_USERNAME;
+        const password = import.meta.env.VITE_API_PASSWORD;
+        if (!username || !password) {
+          throw new Error("Credenciais da API não configuradas.");
+        }
         // Autenticação
         const authRes = await fetch(AUTH_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: 'admin', password: 'admin' })
+          body: JSON.stringify({ username, password })
         });
+
         if (!authRes.ok) throw new Error('Falha na autenticação');
         const { id_token } = await authRes.json();
         setToken(id_token);
-        // Checa promoção
+ 
+ 
+        // Checa o status da promoção
         const promoRes = await fetch(PROMO_URL, {
           headers: { 'Authorization': `Bearer ${id_token}` }
         });
-        const promoData = await promoRes.json();
-        setPromoValid(promoData.valida);
-        setPromoEnds(promoData.encerra);
+        
+        // O método .json() consegue interpretar uma resposta que é apenas 'true' ou 'false'.
+        const isPromoValid = await promoRes.json(); 
+        console.log('Promoção válida:', isPromoValid);
+        // Define o estado diretamente com o valor booleano recebido.
+        setPromoValid(isPromoValid);
+
+        // Como este endpoint não retorna a data de encerramento,
+        // você pode buscar essa informação de outro lugar se precisar.
+        // Por agora, a mensagem de promoção encerrada não mostrará a data.
       } catch (err) {
         console.error(err);
         setPromoValid(false);
@@ -67,7 +87,7 @@ export default function CadastroCineX() {
     const errs = {};
     if (!formData.nome.trim()) errs.nome = 'Nome é obrigatório';
     if (!/^\(\d{2}\)\s-\s\d{5}-\d{4}$/.test(formData.telefone)) errs.telefone = 'Formato: (62) - 98139-6595';
-    if (!/^[^\s@]+@[\s@]+\.[^\s@]+$/.test(formData.email)) errs.email = 'Email inválido';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errs.email = 'Email inválido';
     if (!isValidCPF(formData.cpf)) errs.cpf = 'CPF inválido';
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -94,7 +114,7 @@ export default function CadastroCineX() {
         })
       });
       if (!res.ok) throw new Error('Falha no cadastro');
-      alert('Cadastro realizado com sucesso!');
+      navigate('/confirmacao');
       setFormData({ nome: '', telefone: '', email: '', cpf: '' });
     } catch (err) {
       alert(err.message);
@@ -103,7 +123,8 @@ export default function CadastroCineX() {
 
   // Renderização condicional
   if (promoValid === null) return <p className="text-white text-center mt-4">Verificando promoção...</p>;
-  if (promoValid === false) return <p className="text-red-400 text-center mt-4">Promoção encerrada em {promoEnds}</p>;
+  // CORREÇÃO: A mensagem agora não depende mais do estado 'promoEnds'.
+  if (promoValid === false) return <p className="text-red-400 text-center mt-4">Desculpe, a promoção não está mais válida.</p>;
 
   // Formulário
   return (

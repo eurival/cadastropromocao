@@ -12,7 +12,7 @@ COPY package.json ./
 # Instala as dependências DENTRO do contêiner Linux, gerando um
 # package-lock.json novo e correto para o ambiente.
 RUN npm install
-
+ 
 # Copia o resto do código-fonte da sua aplicação.
 COPY . .
 

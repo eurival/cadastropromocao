@@ -25,9 +25,10 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://cinexapi:8080',
-        changeOrigin: true,
-        secure: false,
+        target: 'https://cinexapi.ingressocinex.com.br',
+        changeOrigin: true, // Essencial para o servidor de destino não rejeitar a requisição
+        secure: false, // Pode ser necessário se o destino tiver certificados auto-assinados (não parece ser o caso aqui, mas é uma boa prática em dev)
+     //   rewrite: (path) => path.replace(/^\/api/, '') // Remove o '/api' antes de enviar para o servidor de destino
       }
     }
   }

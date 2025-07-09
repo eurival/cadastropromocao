@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cadastropromocao-ingress
+  namespace: cadastropromocao-apps
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    argocd.argoproj.io/health.lua: |
+      hs = {}
+      if obj.spec.rules ~= nil and #obj.spec.rules > 0 then
+        hs.status = "Healthy"
+        return hs
+      end
+      hs.status = "Progressing"
+      return hs
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - cadastropromocao.ingressocinex.com.br
+    secretName: cadastropromocao-tls-secret
+  rules:
+  - host: cadastropromocao.ingressocinex.com.br
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: cadastropromocao-service
+            port:
+              number: 80

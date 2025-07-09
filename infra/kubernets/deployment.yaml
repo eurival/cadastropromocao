@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cadastropromocao-deployment
+  namespace: cadastropromocao-apps # Crie um namespace dedicado
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cadastropromocao
+  template:
+    metadata:
+      labels:
+        app: cadastropromocao
+    spec:
+      containers:
+      - name: cadastropromocao
+        image: public.ecr.aws/t6g4w7z5/cadastropromocao-frontend:latest # Imagem a ser usada
+        ports:
+        - containerPort: 80 # Porta do NGINX

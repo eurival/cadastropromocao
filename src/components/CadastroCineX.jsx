@@ -111,7 +111,7 @@ export default function CadastroCineX() {
           email: formData.email,
           cpf: formData.cpf,
           cupomEnviado: false,
-          dataCriacao: new Date().toISOString()
+          dataCadastro: new Date().toISOString()
         })
       });
       if (!res.ok) throw new Error('Falha no cadastro');

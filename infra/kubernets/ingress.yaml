@@ -18,10 +18,10 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - ingressocinex.com.br
+    - roletacinex.art.br
     secretName: cadastropromocao-tls-secret
   rules:
-  - host: ingressocinex.com.br
+  - host: roletacinex.art.br
     http:
       paths:
       - path: /

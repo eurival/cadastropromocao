@@ -1,4 +1,4 @@
-version: '3.8'
+ 
 services:
   cinexapi:
     image: eurival/cinexapi:latest  # Substitua pela sua imagem JHipster

@@ -3,7 +3,7 @@ import { isValidCPF } from '../utils/cpf';
 import { useNavigate } from 'react-router-dom';
 
 // URLs de API
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || ''; 
+const API_BASE_URL = window.runtimeConfig.API_BASE_URL || ''; 
 
 // URLs de API construídas a partir da base
 const AUTH_URL = `${API_BASE_URL}/api/authenticate`;
@@ -23,8 +23,8 @@ export default function CadastroCineX() {
   useEffect(() => {
     async function init() {
       try {
-        const username = import.meta.env.VITE_API_USERNAME;
-        const password = import.meta.env.VITE_API_PASSWORD;
+        const username = window.runtimeConfig.API_USERNAME;
+        const password = window.runtimeConfig.API_PASSWORD;
         if (!username || !password) {
           throw new Error("Credenciais da API não configuradas.");
         }

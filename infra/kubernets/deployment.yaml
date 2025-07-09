@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       annotations:
-        redeploy-at: "2025-07-09T02:15:20Z"
+        redeploy-at: "2025-07-09T02:27:20Z"
       labels:
         app: cadastropromocao
     spec:
@@ -23,7 +23,7 @@ spec:
         env:
         # 1. Endereço interno da API
         - name: VITE_API_BASE_URL
-          value: "http://cinexapi-service.cinex-apps:8080"
+          value: "https://cinexapi.ingressocinex.com.br"
         # 2. Usuário da API, lido do Secret
         - name: VITE_API_USERNAME
           valueFrom:

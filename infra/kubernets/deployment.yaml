@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       annotations:
-        redeploy-at: "2025-07-10T01:42:20Z"
+        redeploy-at: "2025-07-10T01:56:20Z"
       labels:
         app: cadastropromocao
     spec:

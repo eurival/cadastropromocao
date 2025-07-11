@@ -2,19 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { isValidCPF } from '../utils/cpf';
 import { useNavigate } from 'react-router-dom';
 
+// URLs de API
 const API_BASE_URL = window.runtimeConfig.API_BASE_URL || ''; 
+
+// URLs de API construídas a partir da base
+const AUTH_URL = `${API_BASE_URL}/api/authenticate`;
 const CADASTRO_URL = `${API_BASE_URL}/api/cadastropromocaos`;
 const PROMO_URL = `${API_BASE_URL}/api/cadastropromocao-extended/promocaoValidada`;
 
 export default function CadastroCineX() {
-  const navigate = useNavigate();
-  const [token, setToken] = useState('');
-  const [promoValid, setPromoValid] = useState(null);
+  const navigate = useNavigate();        // ← aqui!
+  // Estados principais
+  const [token, setToken] = useState('');         // Bearer token
+  const [promoValid, setPromoValid] = useState(null); // null=pendente, true=ativa, false=encerrada
+  //const [promoEnds, setPromoEnds] = useState('');  // data de encerramento
   const [formData, setFormData] = useState({ nome: '', telefone: '', email: '', cpf: '' });
   const [errors, setErrors] = useState({});
-  const [emailExistente, setEmailExistente] = useState(false);
-  const [cupomEnviado, setCupomEnviado] = useState(null);
 
+  // Ao montar: autentica e busca status da promoção
   useEffect(() => {
     async function init() {
       try {
@@ -23,7 +28,8 @@ export default function CadastroCineX() {
         if (!username || !password) {
           throw new Error("Credenciais da API não configuradas.");
         }
-        const authRes = await fetch(`${API_BASE_URL}/api/authenticate`, {
+        // Autenticação
+        const authRes = await fetch(AUTH_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
@@ -32,13 +38,22 @@ export default function CadastroCineX() {
         if (!authRes.ok) throw new Error('Falha na autenticação');
         const { id_token } = await authRes.json();
         setToken(id_token);
-
+ 
+ 
+        // Checa o status da promoção
         const promoRes = await fetch(PROMO_URL, {
           headers: { 'Authorization': `Bearer ${id_token}` }
         });
         
-        const isPromoValid = await promoRes.json();
+        // O método .json() consegue interpretar uma resposta que é apenas 'true' ou 'false'.
+        const isPromoValid = await promoRes.json(); 
+        console.log('Promoção válida:', isPromoValid);
+        // Define o estado diretamente com o valor booleano recebido.
         setPromoValid(isPromoValid);
+
+        // Como este endpoint não retorna a data de encerramento,
+        // você pode buscar essa informação de outro lugar se precisar.
+        // Por agora, a mensagem de promoção encerrada não mostrará a data.
       } catch (err) {
         console.error(err);
         setPromoValid(false);
@@ -47,30 +62,27 @@ export default function CadastroCineX() {
     init();
   }, []);
 
+  // Handlers de formulário
   const handleChange = ({ target }) => {
     const { name, value } = target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
-  // Função para formatar o telefone
   const handlePhoneChange = e => {
-    let v = e.target.value.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
-    if (v.length > 11) v = v.slice(0, 11); // Limita o número de dígitos para no máximo 11
-    v = v.replace(/^(\d{2})(\d)/, '($1) - $2') // Formata para (XX) - X
-        .replace(/(\d{5})(\d)/, '$1-$2'); // Formata para (XX) - XXXXX-XXXX
-    setFormData(prev => ({ ...prev, telefone: v })); // Atualiza o estado com o telefone formatado
+    let v = e.target.value.replace(/\D/g, '');
+    if (v.length > 11) v = v.slice(0, 11);
+    v = v.replace(/^(\d{2})(\d)/, '($1) - $2').replace(/(\d{5})(\d)/, '$1-$2');
+    setFormData(prev => ({ ...prev, telefone: v }));
   };
-
-  // Função para formatar o CPF
   const handleCPFChange = e => {
-    let v = e.target.value.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
-    if (v.length > 11) v = v.slice(0, 11); // Limita o número de dígitos para 11
-    v = v.replace(/^(\d{3})(\d)/, '$1.$2') // Formata para 000.000
-         .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3') // Formata para 000.000.000
-         .replace(/\.(\d{3})(\d)/, '.$1-$2'); // Formata para 000.000.000-00
-    setFormData(prev => ({ ...prev, cpf: v })); // Atualiza o estado com o CPF formatado
+    let v = e.target.value.replace(/\D/g, '');
+    if (v.length > 11) v = v.slice(0, 11);
+    v = v.replace(/^(\d{3})(\d)/, '$1.$2')
+         .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+         .replace(/\.(\d{3})(\d)/, '.$1-$2');
+    setFormData(prev => ({ ...prev, cpf: v }));
   };
 
+  // Validação dos campos antes de enviar
   const validate = () => {
     const errs = {};
     if (!formData.nome.trim()) errs.nome = 'Nome é obrigatório';
@@ -81,32 +93,12 @@ export default function CadastroCineX() {
     return Object.keys(errs).length === 0;
   };
 
+  // Submissão do formulário
   const handleSubmit = async e => {
     e.preventDefault();
     if (!promoValid) return;
     if (!validate()) return;
-
     try {
-      // Verifica se o email já está cadastrado
-      const emailRes = await fetch(`${CADASTRO_URL}?email.contains=${formData.email}`);
-      const emailData = await emailRes.json();
-
-      if (emailData && emailData.length > 0) {
-        const emailInfo = emailData[0];  // Pega o primeiro registro retornado
-        if (emailInfo.cupomEnviado) {
-          // Caso o cupom já tenha sido enviado
-          setEmailExistente(true);
-          setCupomEnviado(true);
-          return;
-        } else {
-          // Caso o e-mail exista, mas o cupom não tenha sido enviado
-          setEmailExistente(true);
-          setCupomEnviado(false);
-          return;
-        }
-      }
-
-      // Se o e-mail não existir, faz o cadastro
       const res = await fetch(CADASTRO_URL, {
         method: 'POST',
         headers: {
@@ -130,20 +122,12 @@ export default function CadastroCineX() {
     }
   };
 
+  // Renderização condicional
   if (promoValid === null) return <p className="text-white text-center mt-4">Verificando promoção...</p>;
+  // CORREÇÃO: A mensagem agora não depende mais do estado 'promoEnds'.
   if (promoValid === false) return <p className="text-red-400 text-center mt-4">Desculpe, a promoção não está mais válida.</p>;
 
-  // Verifica se o e-mail já existe e redireciona conforme a situação
-  if (emailExistente) {
-    return (
-      <div className="text-center mt-4 text-white">
-        {cupomEnviado 
-          ? "Os cortesias para esse e-mail já foram enviados." 
-          : "Este e-mail já consta no cadastro e você receberá as cortesias em breve."}
-      </div>
-    );
-  }
-
+  // Formulário
   return (
     <div className="min-h-screen flex items-start justify-center bg-[#121212] pt-4 px-4">
       <div className="bg-[#1E1E1E] p-8 rounded shadow-lg w-full max-w-md text-white border-l-4 border-[#BF00FF]">
@@ -161,7 +145,7 @@ export default function CadastroCineX() {
           {/* Telefone */}
           <div>
             <label htmlFor="telefone" className="block text-sm font-medium">Telefone:</label>
-            <input id="telefone" name="telefone" value={formData.telefone} onChange={handlePhoneChange} placeholder="(62) - 98139-6595"
+            <input id="telefone" name="telefone" value={formData.telefone} onChange={handlePhoneChange} placeholder="(62) - 99999-9999"
               className="mt-1 w-full px-4 py-2 bg-[#2A2A2A] border border-gray-700 rounded focus:ring-2 focus:ring-[#BF00FF] text-white placeholder-gray-400" />
             {errors.telefone && <span className="text-red-600 text-sm">{errors.telefone}</span>}
           </div>

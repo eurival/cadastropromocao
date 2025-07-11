@@ -11,13 +11,13 @@ spec:
   template:
     metadata:
       annotations:
-        redeploy-at: "2025-07-10T01:34:20Z"
+        redeploy-at: "2025-07-10T01:42:20Z"
       labels:
         app: cadastropromocao
     spec:
       containers:
       - name: cadastropromocao
-        image: eurival/cadastropromocao-frontend:latest              #public.ecr.aws/t6g4w7z5/cadastropromocao-frontend:latest
+        image: eurival/cadastropromocao-frontend:latest  # Alterar conforme a imagem que você está utilizando
         ports:
         - containerPort: 80
         env:
@@ -36,3 +36,13 @@ spec:
             secretKeyRef:
               name: cadastropromocao-api-credentials
               key: API_PASSWORD
+        resources:
+          requests:
+            memory: "128Mi"           # Requisição de memória (mínimo necessário)
+            cpu: "100m"              # Requisição de CPU (mínimo necessário)
+            ephemeral-storage: "100Mi"  # Requisição de armazenamento efêmero
+          limits:
+            memory: "512Mi"           # Limite de memória (máximo permitido)
+            cpu: "500m"               # Limite de CPU (máximo permitido)
+            ephemeral-storage: "500Mi"  # Limite de armazenamento efêmero
+      imagePullPolicy: Always  # Sempre puxa a imagem mais recente

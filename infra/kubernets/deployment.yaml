@@ -11,13 +11,13 @@ spec:
   template:
     metadata:
       annotations:
-        redeploy-at: "2025-07-09T02:53:20Z"
+        redeploy-at: "2025-07-10T01:04:20Z"
       labels:
         app: cadastropromocao
     spec:
       containers:
       - name: cadastropromocao
-        image: public.ecr.aws/t6g4w7z5/cadastropromocao-frontend:latest
+        image: eurival/cadastropromocao-frontend:latest              #public.ecr.aws/t6g4w7z5/cadastropromocao-frontend:latest
         ports:
         - containerPort: 80
         env:

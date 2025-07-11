@@ -45,4 +45,4 @@ spec:
             memory: "512Mi"           # Limite de memória (máximo permitido)
             cpu: "500m"               # Limite de CPU (máximo permitido)
             ephemeral-storage: "500Mi"  # Limite de armazenamento efêmero
-      imagePullPolicy: Always  # Sempre puxa a imagem mais recente
+    

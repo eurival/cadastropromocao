@@ -1,15 +1,21 @@
-// src/App.jsx
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import CadastroCineX from "./components/CadastroCineX";
+import { Routes, Route } from "react-router-dom"; 
+import LayoutCampelo from "./components/LayoutCampelo"; // <-- 1. IMPORTE O LAYOUT CORRETO
+import CadastroCinex from "./components/CadastroCineX";
 import Confirmacao from "./components/Confirmacao";
+import CadastroCampelo from "./components/CadastroCampelo";
 
 export default function App() {
   return (
- 
-      <Routes>
-        <Route path="/" element={<CadastroCineX />} />
+    <Routes>
+      {/* 2. USE O LayoutCampelo COMO A ROTA "PAI" */}
+      <Route element={<LayoutCampelo />}>
+        
+        {/* As páginas abaixo serão renderizadas dentro do <Outlet /> do LayoutCampelo */}
+        <Route path="/" element={<CadastroCampelo />} />
         <Route path="/confirmacao" element={<Confirmacao />} />
-      </Routes>
- 
+        <Route path="/cadastroCinex" element={<CadastroCinex />} />
+        
+      </Route>
+    </Routes>
   );
 }

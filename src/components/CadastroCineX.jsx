@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { isValidCPF } from '../utils/cpf';
 import { useNavigate } from 'react-router-dom';
+import { format } from 'date-fns-tz';
 
+const nowBrazil = format(
+  new Date(),
+  "yyyy-MM-dd'T'HH:mm:ssXXX",
+  { timeZone: 'America/Sao_Paulo' }
+)
 // URLs de API
 const API_BASE_URL = window.runtimeConfig.API_BASE_URL || ''; 
 
@@ -99,6 +105,28 @@ export default function CadastroCineX() {
     if (!promoValid) return;
     if (!validate()) return;
     try {
+
+      // ETAPA 1: Verificar se o e-mail já existe
+      const checkEmailUrl = `${CADASTRO_URL}?email.equals=${encodeURIComponent(formData.email)}`;
+      const checkEmailRes = await fetch(checkEmailUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!checkEmailRes.ok) {
+        throw new Error('Erro ao verificar o e-mail. Tente novamente.');
+      }
+
+      const existingUsers = await checkEmailRes.json();
+
+      // Se a resposta for um array com um ou mais itens, o e-mail já está em uso.
+      if (existingUsers && existingUsers.length > 0) {
+        setErrors(prev => ({ ...prev, email: 'Este e-mail já está cadastrado!' }));
+        return; // Interrompe a submissão
+      }      
+
+
       const res = await fetch(CADASTRO_URL, {
         method: 'POST',
         headers: {
@@ -111,7 +139,7 @@ export default function CadastroCineX() {
           email: formData.email,
           cpf: formData.cpf,
           cupomEnviado: false,
-          dataCadastro: new Date().toISOString()
+          dataCadastro: nowBrazil
         })
       });
       if (!res.ok) throw new Error('Falha no cadastro');

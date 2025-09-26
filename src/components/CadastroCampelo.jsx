@@ -3,9 +3,8 @@ import { isValidCPF } from '../utils/cpf';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns-tz';
 
-const API_BASE_URL = window.runtimeConfig.API_BASE_URL || ''; 
-const AUTH_URL = `${API_BASE_URL}/api/authenticate`;
-const CADASTRO_URL = `${API_BASE_URL}/api/cadastropromocaos`
+const AUTH_URL = '/api/authenticate';
+const CADASTRO_URL = '/api/cadastropromocaos';
 
 export default function CadastroCampelo() {
   const navigate = useNavigate();

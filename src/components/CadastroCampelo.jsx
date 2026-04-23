@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { isValidCPF } from '../utils/cpf';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns-tz';
+import { getApiBaseUrl, getApiPassword, getApiUsername } from '../config/runtimeConfig';
 
-const API_BASE_URL = window.runtimeConfig.API_BASE_URL || ''; 
+const API_BASE_URL = getApiBaseUrl();
 const AUTH_URL = `${API_BASE_URL}/api/authenticate`;
 const CADASTRO_URL = `${API_BASE_URL}/api/cadastropromocaos`
 
@@ -18,8 +19,8 @@ export default function CadastroCampelo() {
   useEffect(() => {
     async function init() {
       try {
-        const username = window.runtimeConfig.API_USERNAME;
-        const password = window.runtimeConfig.API_PASSWORD;
+        const username = getApiUsername();
+        const password = getApiPassword();
         if (!username || !password) throw new Error("Credenciais não configuradas.");
 
         const authRes = await fetch(AUTH_URL, {

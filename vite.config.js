@@ -1,6 +1,5 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import fs from 'fs';
 import path from 'path';
 
 // Deriva __dirname em ESM
@@ -19,16 +18,11 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    https: {
-      key: fs.readFileSync(path.resolve(__dirname, 'certs/localhost-key.pem')),
-      cert: fs.readFileSync(path.resolve(__dirname, 'certs/localhost.pem'))
-    },
     proxy: {
       '/api': {
         target: 'https://cinexapi.ingressocinex.com.br',
         changeOrigin: true, // Essencial para o servidor de destino não rejeitar a requisição
-        secure: false, // Pode ser necessário se o destino tiver certificados auto-assinados (não parece ser o caso aqui, mas é uma boa prática em dev)
-     //   rewrite: (path) => path.replace(/^\/api/, '') // Remove o '/api' antes de enviar para o servidor de destino
+        secure: false,
       }
     }
   }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { isValidCPF } from '../utils/cpf';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns-tz';
+import { getApiBaseUrl, getApiPassword, getApiUsername } from '../config/runtimeConfig';
 
 const nowBrazil = format(
   new Date(),
@@ -9,7 +10,7 @@ const nowBrazil = format(
   { timeZone: 'America/Sao_Paulo' }
 )
 // URLs de API
-const API_BASE_URL = window.runtimeConfig.API_BASE_URL || ''; 
+const API_BASE_URL = getApiBaseUrl();
 
 // URLs de API construídas a partir da base
 const AUTH_URL = `${API_BASE_URL}/api/authenticate`;
@@ -29,8 +30,8 @@ export default function CadastroCineX() {
   useEffect(() => {
     async function init() {
       try {
-        const username = window.runtimeConfig.API_USERNAME;
-        const password = window.runtimeConfig.API_PASSWORD;
+        const username = getApiUsername();
+        const password = getApiPassword();
         if (!username || !password) {
           throw new Error("Credenciais da API não configuradas.");
         }

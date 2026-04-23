@@ -12,6 +12,9 @@ FROM nginx:stable-alpine
 # Copia os ficheiros estáticos da aplicação
 COPY --from=build /app/dist /usr/share/nginx/html
 
+# Usa a configuração do Nginx com fallback para SPA e proxy de API
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # --- ALTERAÇÃO IMPORTANTE ---
 # Copia o nosso novo script de entrypoint para dentro do contentor
 COPY entrypoint.sh /entrypoint.sh
